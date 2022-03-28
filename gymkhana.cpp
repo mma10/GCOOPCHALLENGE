@@ -13,34 +13,45 @@ class gymkhana{
 
         // responsibility class
         class responsibility{
-            protected:                              
+            public:                              
                 int position;
                 string designation;                              
         };    
 
         // Initialize societyMembers class
-        class SocietyMember: private responsibility{
+        class SocietyMember: public responsibility{
             private:
                 student member;
         };
 
         // Initialize society class
-        class Society: private responsibility{
+        class Society: public responsibility{
             private:
                 student secretary;                
                 vector<SocietyMember>  members;
-                int budget;                                
+                int budget;    
+            public:
+                Society(){
+
+                }     
+
+                int getBudget(){
+                    return budget;
+                }
+                void amendBudget(int newBudget){
+                    budget = newBudget;
+                }      
         };
 
         // Inititalize Council class
-        class Council: private responsibility{
+        class Council: public responsibility{
             private:
                 student secretary;
                 vector<Society> societies;
         };
 
         // Initialize VicePresident class
-        class VicePresident: private responsibility{
+        class VicePresident: public responsibility{
             private:
                 student vicePresident;
                 vector<Council> councils;
@@ -48,7 +59,7 @@ class gymkhana{
         };    
         
         // Initialize President class
-        class President: private responsibility{
+        class President: public responsibility{
             // president + gymkhana
             private:
                 student president;
@@ -77,8 +88,23 @@ class gymkhana{
 
         // limit is the max % of budget alloted to each society
         // alloted is the % of budget requested by each society
-        bool allocateBudget(vector<int> limit,vector<int> alloted){
-            
+        bool allocateBudget(vector<pair<string,int>> limit,vector<pair<string,int>> alloted){           
+            if(limit.size() != alloted.size() || alloted.size() != societies.size())
+                return false;
+            int totalAlloted = 0;
+            for(int i = 0; i < alloted.size(); i++){
+                if(alloted[i].second > limit[i].second * budget / 100)
+                    return false;
+                totalAlloted += alloted[i].second;
+            }
+            if(totalAlloted > budget)
+                return false;
+
+            for(int i = 0; i < societies.size(); i++)
+                for(int j = 0; j < alloted.size(); j++)
+                    if(societies[i].designation == alloted[i].first)
+                        societies[i].amendBudget(alloted[i].second);
+            return true;
         }        
 };
 
