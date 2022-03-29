@@ -2,87 +2,13 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-class student{
-    
-};
-
-class Event{
-    public: 
-        bool success;
-        vector<pair<string,int>> societies;        
-};
 
 class gymkhana{
     private:
         // Initial budget given by the government
         int budget;
 
-        // responsibility class
-        class responsibility{
-            public:                              
-                int position;
-                string designation;                              
-        };    
-
-        // Initialize societyMembers class
-        class SocietyMember: public responsibility{
-            private:
-                student member;
-        };
-
-        // Initialize society class
-        class Society: public responsibility{
-            private:
-                student secretary;                
-                vector<SocietyMember>  members;
-                int budget;    
-            public:
-                Society(){
-
-                }     
-
-                int getBudget(){
-                    return budget;
-                }
-                void amendBudget(int newBudget){
-                    budget = newBudget;
-                }      
-        };
-
-        // Inititalize Council class
-        class Council: public responsibility{
-            private:
-                student secretary;
-                vector<Society> societies;
-        };
-
-        // Initialize VicePresident class
-        class VicePresident: public responsibility{
-            private:
-                student vicePresident;
-                vector<Council> councils;
-                // + extra roles
-        };    
-        
-        // Initialize President class
-        class President: public responsibility{
-            // president + gymkhana
-            private:
-                student president;
-                VicePresident* vicePresident;
-                // + extra roles
-        };
-
-        // Objects of gymkhana entities
-        President president;
-        VicePresident vicePresident;
-        vector<Council> councils;
-        vector<Society> societies;
-        vector<SocietyMember> societyMembers;
-        vector<student> restStudents;
-        
-    public:
-        // Initialize Poll class
+        // Initialize Poll class: Private so that only the roleplayers can create one
         class Poll{
             private:
                 vector<int> responses;
@@ -111,6 +37,152 @@ class gymkhana{
 
         };
 
+
+        // responsibility class
+        class responsibility{
+            public:                              
+                int position;
+                string designation; 
+
+                Poll openNewPoll(string stmt,vector<string> choices,int type){
+                    return Poll(stmt,choices,type);
+                }                                 
+        };       
+               
+        // Message class as discussion subunit
+        class Message{
+            public:
+                string studentName;
+                string msge;
+                string time;
+                Message(string stName,string message,string Time){
+                    studentName = stName, msge = message, time = Time;
+                }
+        };
+
+        // Discussion in an event    
+        class Discussion{
+            public:
+                vector<Message> msges;
+
+                // get Random date string for now
+                string getRandTime(){                    
+                    return "29/03/2022 " + to_string(rand() % 24) + ":" + to_string(rand() % 60);
+                }
+                // Add message to the discussion messages                                
+                bool addMessage(string msge,string stName){
+                    msges.push_back(Message(stName,msge,getRandTime()));
+                    return true;
+                }
+
+                // Read latest message
+                void printLatestMsge(){
+                    int size = msges.size();
+                    if(size > 0){
+                        Message lastMsge = msges[size-1];
+                        cout << "On " + lastMsge.time + "," + lastMsge.studentName + " wrote " + lastMsge.msge << endl;
+                    }
+                }
+        };   
+
+        // Inititate event class
+        class Event{            
+            public: 
+                bool success;
+                vector<pair<string,int>> societies;                       
+
+                // API to create a discussion for an event
+                Discussion newDiscussion(){
+                    return Discussion();
+                };
+        };
+
+        // Student class
+        class student{
+            private:
+                int stId;
+            public:        
+                string name;
+                vector<responsibility> respn;
+
+                // Get random message from dataset
+                string getNewMessageStr(){                    
+                    vector<string> msges = {"Hey, hope everything is fine", "Good to know", "Please post to next day"};
+                    return msges[rand() % msges.size()];
+                }
+                // Write a new message to the discussion
+                bool writeMessage(Discussion &disc){
+                    string msge = getNewMessageStr();
+                    return disc.addMessage(msge,name);                    
+                }                                      
+        };              
+
+        
+
+                
+        // Initialize societyMembers class
+        class SocietyMember: public responsibility{
+            private:
+                student member;
+        };
+        
+        // Initialize society class
+        class Society: public responsibility{
+            private:
+                student secretary;                
+                vector<SocietyMember>  members;
+                int budget;    
+            public:
+                Society(){
+
+                }     
+
+                int getBudget(){
+                    return budget;
+                }
+                void amendBudget(int newBudget){
+                    budget = newBudget;
+                }                  
+        };
+
+        // Inititalize Council class
+        class Council: public responsibility{
+            private:
+                student secretary;
+                vector<Society> societies;
+        };
+
+        // Initialize VicePresident class
+        class VicePresident: public responsibility{
+            private:
+                student vicePresident;
+                vector<Council> councils;
+                // + extra roles
+        };    
+        
+        // Initialize President class
+        class President: public responsibility{
+            // president + gymkhana
+            private:
+                student president;
+                VicePresident* vicePresident;
+                // + extra roles
+        };
+
+
+        // Objects of gymkhana entities
+        President president;
+        VicePresident vicePresident;
+        vector<Council> councils;
+        vector<Society> societies;
+        vector<SocietyMember> societyMembers;
+        vector<student> restStudents;
+
+
+        
+        
+    public:
+        
         // Function to execute the poll
         // type = 0 -> Poll only for heads
         // type = 1 -> Poll only for all society members
@@ -144,6 +216,8 @@ class gymkhana{
             return poll.setResponses(responses);            
         }      
 
+        
+        
         vector<string> positions;
         void addResposibility(){
             
