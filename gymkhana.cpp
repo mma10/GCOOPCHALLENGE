@@ -19,6 +19,7 @@ class Gymkhana{
 
                 bool setResponses(vector<int> res){
                     responses = res;
+                    return true;
                 }
 
                 void printPoll(){
@@ -27,7 +28,7 @@ class Gymkhana{
                     for(int res: responses)
                         resSum += res;
                     for(int i = 1; i <= choices.size(); i++)
-                        cout << responses[i] * 100 / resSum << "% : " <<  i << ". " << choices[i] << endl;
+                        cout << responses[i-1] * 100 / resSum << "% : " <<  i << ". " << choices[i-1] << endl;
                 }
                 
                 Poll(string stmt,vector<string> chs,int typ){
@@ -69,7 +70,7 @@ class Gymkhana{
                 vector<Message> msges;
 
                 // get Random date string for now
-                string getRandTime(){                    
+                string getRandTime(){                                  
                     return "29/03/2022 " + to_string(rand() % 24) + ":" + to_string(rand() % 60);
                 }
                 // Add message to the discussion messages                                
@@ -90,30 +91,30 @@ class Gymkhana{
 
         // Inititate event class
         class Event{            
-            public: 
+            public:
+                int id;
+                string name; 
                 bool success;
-                vector<pair<string,int>> societies;                       
+                vector<pair<string,int>> societies;    
+                Discussion disc;                  
 
                 // API to create a discussion for an event
-                Discussion newDiscussion(){
-                    return Discussion();
-                };
+                // Discussion newDiscussion(){
+                //     return Discussion();
+                // };
+                Event(int ID,string eventName){
+                    id = ID, name = eventName;
+                }
         };
 
         // Student class
         class student{               
             public:  
                 int id;      
-                string name;                
-               
-                // Get random message from dataset
-                string getNewMessageStr(){                    
-                    vector<string> msges = {"Hey, hope everything is fine", "Good to know", "Please post to next day"};
-                    return msges[rand() % msges.size()];
-                }
+                string name; 
+
                 // Write a new message to the discussion
-                bool writeMessage(Discussion &disc){
-                    string msge = getNewMessageStr();
+                bool writeMessage(Discussion &disc,string msge){                    
                     return disc.addMessage(msge,name);                    
                 }                
         };              
@@ -188,7 +189,8 @@ class Gymkhana{
 
 
         // Inititate instances of gymkhana entities
-        vector<student> allStudents;    
+        vector<student> allStudents;   
+        vector<Event> events; 
         vector<President> president;
         vector<VicePresident> vicePresident;    
         vector<Council> councils;
@@ -203,8 +205,9 @@ class Gymkhana{
         // type = 0 -> Poll only for heads
         // type = 1 -> Poll only for all society members
         // type = 2 -> Poll only for rest of students
+        // type = 3 -> Poll for all students
         bool executePoll(Poll &poll){            
-            int size;
+            int size = 0;
             // Assign random value from each candidate
             switch(poll.type){
                 // Poll only for heads: President + V.President + All council heads + All society heads
@@ -219,14 +222,18 @@ class Gymkhana{
                 case 2:
                     size = restStudents.size();
                     break;
+                // Poll for all students
+                case 3:
+                    size = allStudents.size();
+                    break;
                 default:
                     return false;
             }
 
             int options = poll.choices.size(); 
-            vector<int> responses;
-            for(int i = 0; i < size; i++){
-                int response = rand() % options;
+            vector<int> responses(options);
+            for(int i = 0; i < size; i++){                       
+                int response = rand() % options;                                
                 responses[response]++;                        
             }
             return poll.setResponses(responses);            
@@ -234,7 +241,8 @@ class Gymkhana{
         
         // gymkhana constructor
         Gymkhana(){
-            positions = {"President", "VicePresident", "GSecCouncil", "SecSociety", "MemSociety", "RemStudent"};                                                         
+            positions = {"President", "VicePresident", "GSecCouncil", "SecSociety", "MemSociety", "RemStudent"};     
+            budget = 80000;                                                    
         }
 
         // limit is the max % of budget alloted to each society
@@ -277,8 +285,11 @@ class Gymkhana{
                         if(soc.second <= society.getBudget())
                             society.amendBudget(society.getBudget() - soc.second); 
             // Mark the event as successful
-            event.success = true;
+            return event.success = true;            
         }
+
+
+        /* Custom Function to create and engage instances(objects) with the system */
 
         void addStudent(int id,string studentName){
             student newStudent;
@@ -296,15 +307,61 @@ class Gymkhana{
             councils.push_back(Council(2,"Cultural",allStudents[3]));
             societies.push_back(Society(3,"Neuromancers",allStudents[4]));
             societies.push_back(Society(3,"Robotics",allStudents[5]));
-            societies.push_back(Society(3,"Dance and music",allStudents[6]));
+            societies.push_back(Society(3,"DanceMusic",allStudents[6]));
             societyMembers.push_back(SocietyMember(4,"Neuromancers",allStudents[5]));
             societyMembers.push_back(SocietyMember(4,"Robotics",allStudents[7]));
             societyMembers.push_back(SocietyMember(4,"Robotics",allStudents[3]));
-            societyMembers.push_back(SocietyMember(4,"Dance and Music",allStudents[8]));
-            societyMembers.push_back(SocietyMember(4,"Dance and Music",allStudents[1]));
+            societyMembers.push_back(SocietyMember(4,"DanceMusic",allStudents[8]));
+            societyMembers.push_back(SocietyMember(4,"DanceMusic",allStudents[1]));
             restStudents.push_back(allStudents[9]);  
 
             // Add their relation, if required          
+        }
+
+        // Print budget of each society
+        void printBudget(){
+            for(Society &soc: societies)
+                cout << soc.designation << " " << soc.getBudget() << endl;
+        }
+
+        // Create and sanction funds for the event
+        bool createAndSanctionEvent(){
+            Event newEvent(1,"General Championship");
+            vector<pair<string,int>> funds = {{"Neuromancers",10000},{"DanceMusic",12000}};
+            newEvent.societies = funds;
+            events.push_back(newEvent);   
+            sanctionEvent(events[0]);         
+            return events[0].success;
+        }
+
+        // Create a poll with a gymkhana entity, and execute it based on its type
+        void createAndExecPoll(){
+            // Lets create a poll via Neuromancer's secretary: societies[0]            
+            string stmt = "How many tech events should be held in General Championship";
+            vector<string> choices = {"One", "Two", "Three"};
+            Poll newPoll = societies[0].openNewPoll(stmt,choices,3);                        
+            if(executePoll(newPoll)){
+                cout << "New Poll successfully created" << endl;
+                newPoll.printPoll();
+            }
+            else    
+                cout << "Failed to create new poll" << endl;            
+        }
+
+        // Extend the discussion of the event, by inserting comments from students
+        void extendDiscussion(){
+            // Here we extend the discussion of event: General Championship: event[0]
+            // Given are the comments from students regards to the event
+            vector<pair<string,int>> comments = {{"GC should be held asap!",0}, {"I think we should spend time to analyse budget",3}, {"We could go about another round for fund raising",7}};
+            cout << "Discussion on " << events[0].name << " event" << endl;
+            for(pair<string,int> &comment: comments){
+                int stNum = comment.second;
+                string msge = comment.first;
+                if(allStudents[stNum].writeMessage(events[0].disc,msge))
+                    events[0].disc.printLatestMsge();
+                else
+                    cout << "Error writing message to the event discussion" << endl;
+            }
         }
 };
 
@@ -331,17 +388,43 @@ int main()
     gymkhana.addStudent(8,"Raju");
     gymkhana.addStudent(9,"Lakshman");
     gymkhana.addStudent(10,"Adil");
+    cout << endl;
+
 
     // Add gymkhana entities 
     gymkhana.addEntities();
+    cout << "Entities addded" << endl << endl;
+
 
     // Execute budget for societies
+    vector<pair<string,int>> limit = {{"Neuromancers",40}, {"Robotics",60}, {"DanceMusic",40}};
+    vector<pair<string,int>> alloted = {{"Neuromancers",15000}, {"Robotics",20000}, {"DanceMusic",17000}}; 
+    if(gymkhana.allocateBudget(limit,alloted)){
+        cout << "Budget alloted within societies" << endl;
+        gymkhana.printBudget(); 
+    }
+    else
+        cout << "Allocation out of constrains" << endl;    
+    cout << endl;   
+    
 
-    // Sanction budget for societies
+    // Sanction budget for events and create events
+    if(gymkhana.createAndSanctionEvent())
+        cout << "Funds successfully sanctioned for the event" << endl;
+    else
+        cout << "Sorry, funds could not be sanctioned for the event due to insufficient budget" << endl;
+    cout << "Remaining Budget for all societies" << endl;
+    gymkhana.printBudget();   
+    cout << endl;
+
 
     // Demo polls
+    gymkhana.createAndExecPoll();
+    cout << endl;
+
 
     // Demo discussion
+    gymkhana.extendDiscussion();
 
 	return 0;
 }
