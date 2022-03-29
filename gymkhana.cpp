@@ -335,5 +335,13 @@ int main()
     // Add gymkhana entities 
     gymkhana.addEntities();
 
+    // Execute budget for societies
+
+    // Sanction budget for societies
+
+    // Demo polls
+
+    // Demo discussion
+
 	return 0;
 }
