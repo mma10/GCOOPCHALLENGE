@@ -3,7 +3,7 @@
 using namespace std;
 
 
-class gymkhana{
+class Gymkhana{
     private:
         // Initial budget given by the government
         int budget;
@@ -46,7 +46,10 @@ class gymkhana{
 
                 Poll openNewPoll(string stmt,vector<string> choices,int type){
                     return Poll(stmt,choices,type);
-                }                                 
+                }        
+                responsibility(int pos,string des){
+                    position = pos, designation = des;
+                }                         
         };       
                
         // Message class as discussion subunit
@@ -98,13 +101,11 @@ class gymkhana{
         };
 
         // Student class
-        class student{
-            private:
-                int stId;
-            public:        
-                string name;
-                vector<responsibility> respn;
-
+        class student{               
+            public:  
+                int id;      
+                string name;                
+               
                 // Get random message from dataset
                 string getNewMessageStr(){                    
                     vector<string> msges = {"Hey, hope everything is fine", "Good to know", "Please post to next day"};
@@ -114,7 +115,7 @@ class gymkhana{
                 bool writeMessage(Discussion &disc){
                     string msge = getNewMessageStr();
                     return disc.addMessage(msge,name);                    
-                }                                      
+                }                
         };              
 
         
@@ -124,6 +125,10 @@ class gymkhana{
         class SocietyMember: public responsibility{
             private:
                 student member;
+            public:
+                SocietyMember(int position,string designation,student st): responsibility(position,designation){
+                    member = st;
+                }
         };
         
         // Initialize society class
@@ -133,16 +138,16 @@ class gymkhana{
                 vector<SocietyMember>  members;
                 int budget;    
             public:
-                Society(){
-
-                }     
-
                 int getBudget(){
                     return budget;
                 }
                 void amendBudget(int newBudget){
                     budget = newBudget;
-                }                  
+                }          
+                Society(int position,string designation,student st): responsibility(position,designation){
+                    secretary = st;                    
+                    budget = 0;
+                }    
         };
 
         // Inititalize Council class
@@ -150,6 +155,10 @@ class gymkhana{
             private:
                 student secretary;
                 vector<Society> societies;
+            public:
+                Council(int position,string designation,student st): responsibility(position,designation){
+                    secretary = st;                    
+                }
         };
 
         // Initialize VicePresident class
@@ -157,7 +166,11 @@ class gymkhana{
             private:
                 student vicePresident;
                 vector<Council> councils;
-                // + extra roles
+                // + extra roles       
+            public:     
+                VicePresident(int position,string designation,student st): responsibility(position,designation){
+                    vicePresident = st;
+                } 
         };    
         
         // Initialize President class
@@ -165,23 +178,26 @@ class gymkhana{
             // president + gymkhana
             private:
                 student president;
-                VicePresident* vicePresident;
-                // + extra roles
+                vector<VicePresident> vicePresident;
+                // + extra roles 
+            public:  
+                President(int position,string designation,student st): responsibility(position,designation){
+                    president = st;
+                }             
         };
 
 
-        // Objects of gymkhana entities
-        President president;
-        VicePresident vicePresident;
+        // Inititate instances of gymkhana entities
+        vector<student> allStudents;    
+        vector<President> president;
+        vector<VicePresident> vicePresident;    
         vector<Council> councils;
         vector<Society> societies;
         vector<SocietyMember> societyMembers;
-        vector<student> restStudents;
-
-
+        vector<student> restStudents;        
         
-        
-    public:
+    public:      
+        vector<string> positions;
         
         // Function to execute the poll
         // type = 0 -> Poll only for heads
@@ -214,19 +230,11 @@ class gymkhana{
                 responses[response]++;                        
             }
             return poll.setResponses(responses);            
-        }      
-
-        
-        
-        vector<string> positions;
-        void addResposibility(){
-            
-        } 
+        }          
         
         // gymkhana constructor
-        gymkhana(){
-            positions = {"President", "VicePresident", "GSecCouncil", "SecSociety", "MemSociety", "RemStudent"};
-                                                         
+        Gymkhana(){
+            positions = {"President", "VicePresident", "GSecCouncil", "SecSociety", "MemSociety", "RemStudent"};                                                         
         }
 
         // limit is the max % of budget alloted to each society
@@ -272,15 +280,60 @@ class gymkhana{
             event.success = true;
         }
 
+        void addStudent(int id,string studentName){
+            student newStudent;
+            newStudent.id = id;
+            newStudent.name = studentName;
+            allStudents.push_back(newStudent);
+            cout << newStudent.name << " added" << endl;
+        }
+
+        // Add entities of Gymkhana
+        void addEntities(){
+            president.push_back(President(0,"Gymkhana",allStudents[0]));  
+            vicePresident.push_back(VicePresident(1,"Gymkhana",allStudents[0]));
+            councils.push_back(Council(2,"Tech",allStudents[2]));
+            councils.push_back(Council(2,"Cultural",allStudents[3]));
+            societies.push_back(Society(3,"Neuromancers",allStudents[4]));
+            societies.push_back(Society(3,"Robotics",allStudents[5]));
+            societies.push_back(Society(3,"Dance and music",allStudents[6]));
+            societyMembers.push_back(SocietyMember(4,"Neuromancers",allStudents[5]));
+            societyMembers.push_back(SocietyMember(4,"Robotics",allStudents[7]));
+            societyMembers.push_back(SocietyMember(4,"Robotics",allStudents[3]));
+            societyMembers.push_back(SocietyMember(4,"Dance and Music",allStudents[8]));
+            societyMembers.push_back(SocietyMember(4,"Dance and Music",allStudents[1]));
+            restStudents.push_back(allStudents[9]);  
+
+            // Add their relation, if required          
+        }
 };
 
 void greet(){
     cout << "Welcome to Gymkhana Management System" << endl;
+    cout << "An instance of gymkhana will be created" << endl;
 }
 
 int main()
 {
     greet();
-    
+
+    // Crete gymkhana class
+    Gymkhana gymkhana;   
+     
+    // Add students
+    gymkhana.addStudent(1,"Ramesh");
+    gymkhana.addStudent(2,"Mahesh");
+    gymkhana.addStudent(3,"Raja");
+    gymkhana.addStudent(4,"Aarti");
+    gymkhana.addStudent(5,"Pooja");
+    gymkhana.addStudent(6,"Mohan");
+    gymkhana.addStudent(7,"Ravi");
+    gymkhana.addStudent(8,"Raju");
+    gymkhana.addStudent(9,"Lakshman");
+    gymkhana.addStudent(10,"Adil");
+
+    // Add gymkhana entities 
+    gymkhana.addEntities();
+
 	return 0;
 }
